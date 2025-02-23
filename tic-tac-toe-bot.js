@@ -58,7 +58,7 @@ function moveValid(boxx,boxy,board){
 function doMove(boxx,boxy,board){
     board[boxy][boxx] = playerTurn;
     playerTurn = turnDict[playerTurn];
-    document.getElementById("status text").innerText = `it is ${board}\'s turn`;
+    document.getElementById("status text").innerText = `it is ${playerTurn}\'s turn`;
 
 }
 
@@ -163,7 +163,7 @@ function evaluateBoard(board, playerTurn) {
             return 1
         }
         if(playerWin(board,'o')){
-            return 1
+            return -1
         }
         if(isTie(board)){
             return 0
@@ -175,16 +175,41 @@ function evaluateBoard(board, playerTurn) {
 
 function doBotMove(board,playerTurn){
     let valueBoard = [[null,null,null],[null,null,null],[null,null,null]]
+    let value;
+    let bestMovex;
+    let bestMovey;
     for (let i = 0; i < board.length; i++){
         for(let j = 0; j < board[i].length; j++){
-            console.log(i)
             if(moveValid(j,i,board)){
-                valueBoard[i][j] = evaluateBoard(board,playerTurn)
+                valueBoard[i][j] = evaluateBoard(setShape(board,playerTurn,j,i),turnDict[playerTurn])
             }
         }
     }
-    
     console.log(valueBoard)
+    if (playerTurn === "x") {
+        value = -Infinity; // Fixed capitalization
+        for (let i = 0; i < valueBoard.length; i++) {
+            for (let j = 0; j < valueBoard[i].length; j++) {
+                if(value < valueBoard[i][j] && moveValid(j,i,board)){
+                    bestMovex = j
+                    bestMovey = i
+                    value = valueBoard[i][j]
+                }
+            }
+        }
+    } else if (playerTurn === "o") {
+        value = Infinity; // Fixed capitalization
+        for (let i = 0; i < board.length; i++) {
+            for (let j = 0; j < board[i].length; j++) {
+                if(value > valueBoard[i][j] && moveValid(j,i,board)){
+                    bestMovex = j
+                    bestMovey = i
+                    value = valueBoard[i][j]
+                }
+            }
+        }
+    }
+    doMove(bestMovex,bestMovey,board)
 }
 
 function setShape(board,shape, x,y){
@@ -205,11 +230,25 @@ function onPageClick(event) {
         if(moveValid(boxx,boxy,board) && !gameEnded(board)){
             doMove(boxx,boxy,board)
 
-            doBotMove(board,playerTurn)
-
+            if(!gameEnded(board)){
+                doBotMove(board,playerTurn)
+            }
             drawBoard(board)
 
         }
+
+        if(gameEnded(board)){
+            if(playerWin(board,"x")){
+                document.getElementById("status text").innerText = `player x won`;
+            }
+            if(playerWin(board,"o")){
+                document.getElementById("status text").innerText = `player o won`;
+            }
+            if(isTie(board)){
+                document.getElementById("status text").innerText = `it is a tie`;
+            }
+        }
+
     }
 }
 
