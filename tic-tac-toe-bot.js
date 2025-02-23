@@ -63,22 +63,23 @@ function doMove(boxx,boxy,board){
 }
 
 function drawBoard(board){
-    ctx.clearRect(0,0,width,height);
+    canvas.width = canvas.width
     drawGrid(width/2,height/2,width*0.5);
     for (let i = 0; i < board.length; i++){
         for(let j = 0; j < board[i].length; j++){
             let locx = j * width/3 + width/6;
             let locy = i * height/3 + height/6;
             if(board[i][j] == "x"){
+                console.log("x")
                 drawX(locx,locy,width/3.5)
             }
             if(board[i][j] == "o"){
+                console.log("o")
                 drawCircle(locx,locy,width/3.5)
-            }
-            else{
             }
         }
     }
+    console.log("/")
 }
 
 function playerWin(board,player){ // checks both if the game is ended and what value the ended game would be
@@ -185,7 +186,6 @@ function doBotMove(board,playerTurn){
             }
         }
     }
-    console.log(valueBoard)
     if (playerTurn === "x") {
         value = -Infinity; // Fixed capitalization
         for (let i = 0; i < valueBoard.length; i++) {
@@ -227,28 +227,34 @@ function onPageClick(event) {
         var boxx = Math.floor(mouseX*3/width);
         var boxy = Math.floor(mouseY*3/height);
 
+        if(gameEnded(board)){
+            board = [["","",""],["","",""],["","",""]];
+            playerTurn = 'x';
+            document.getElementById("status text").innerText = `it is ${playerTurn}\'s turn`;
+        }
+
         if(moveValid(boxx,boxy,board) && !gameEnded(board)){
             doMove(boxx,boxy,board)
 
             if(!gameEnded(board)){
                 doBotMove(board,playerTurn)
             }
-            drawBoard(board)
+
+            if(gameEnded(board)){
+                if(playerWin(board,"x")){
+                    document.getElementById("status text").innerText = `player x won`;
+                }
+                if(playerWin(board,"o")){
+                    document.getElementById("status text").innerText = `player o won`;
+                }
+                if(isTie(board)){
+                    document.getElementById("status text").innerText = `it is a tie`;
+                }
+            }
 
         }
-
-        if(gameEnded(board)){
-            if(playerWin(board,"x")){
-                document.getElementById("status text").innerText = `player x won`;
-            }
-            if(playerWin(board,"o")){
-                document.getElementById("status text").innerText = `player o won`;
-            }
-            if(isTie(board)){
-                document.getElementById("status text").innerText = `it is a tie`;
-            }
-        }
-
+        
+        drawBoard(board)
     }
 }
 
